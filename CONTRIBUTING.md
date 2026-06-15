@@ -17,19 +17,19 @@ I have experience with WSL2 and understand the pain points of setting up Kuberne
 
 ### Problem Description
 
-[In your own words, what's broken or missing?]
+When running Minikube in WSL2 using the Docker driver, the IP address assigned to the cluster (e.g., `172.17.0.2`) is not accessible from the Windows browser. Users cannot reach their web apps or services using standard methods like `minikube service`, leading to connectivity timeouts.
 
 ### Expected Behavior
 
-[What should happen?]
+Users should be able to access locally deployed web apps from their Windows host browser using the Minikube cluster IP or via a documented workaround. The official documentation should clearly explain how to establish this networking.
 
 ### Current Behavior
 
-[What actually happens?]
+Users follow standard Minikube commands under WSL2 with `--driver=docker` and receive an internal container IP. The browser simply spins and times out because Windows does not route traffic directly to the Docker subnet inside WSL2.
 
 ### Affected Components
 
-[Which parts of the codebase are involved?]
+Documentation (`site/content/en/docs/start/` and `site/content/en/docs/drivers/docker/`), specifically the sections regarding OS-specific networking limits, the Docker driver, and WSL2.
 
 ---
 
@@ -37,19 +37,22 @@ I have experience with WSL2 and understand the pain points of setting up Kuberne
 
 ### Environment Setup
 
-[Notes on setting up your local development environment - challenges you faced, how you solved them]
+I set up a fresh Ubuntu 20.04 WSL2 instance on Windows. I installed Docker natively inside WSL2 (no Docker Desktop) and launched Minikube using `--driver=docker`.
 
 ### Steps to Reproduce
 
-1. [Step 1]
-2. [Step 2]
-3. [Observed result]
+1. Install WSL2, Docker engine, and Minikube.
+2. Start Minikube: `minikube start --driver=docker`.
+3. Create a test deployment: `kubectl create deployment hello-minikube --image=k8s.gcr.io/echoserver:1.4`.
+4. Expose the deployment: `kubectl expose deployment hello-minikube --type=NodePort --port=8080`.
+5. Run `minikube service hello-minikube` and attempt to navigate to the provided IP address in a Windows browser.
+6. The browser will fail to connect.
 
 ### Reproduction Evidence
 
-- **Commit showing reproduction:** [Link to commit in your fork]
-- **Screenshots/logs:** [If applicable]
-- **My findings:** [What you discovered during reproduction]
+- **Commit showing reproduction:** Not applicable (documentation issue).
+- **Screenshots/logs:** The browser says "Hmmmm.... can't reach this page" for `http://172.17.0.2:32498`.
+- **My findings:** The WSL2 networking model prevents direct routing to the Docker bridge network. A workaround like `minikube tunnel` or `kubectl port-forward` is required.
 
 ---
 
@@ -57,30 +60,30 @@ I have experience with WSL2 and understand the pain points of setting up Kuberne
 
 ### Analysis
 
-[Your analysis of the root cause - what's causing the issue?]
+The root cause is a well-known limitation of Docker networking on Windows and macOS. WSL2 operates on its own virtual switch and Docker provides an internal bridge network that the host OS cannot route to out-of-the-box. Many users lack guidance on utilizing tools like `minikube tunnel` to bridge the gap.
 
 ### Proposed Solution
 
-[High-level description of your fix approach]
+Add clear, step-by-step instructions to the Minikube documentation (specifically the WSL2 and Docker driver pages) detailing how to access services using `minikube tunnel` and other workarounds.
 
 ### Implementation Plan
 
 Using UMPIRE framework (adapted):
 
-**Understand:** [Restate the problem]
+**Understand:** Users cannot reach services deployed on Minikube within WSL2 using the Docker driver because of networking boundaries.
 
-**Match:** [What similar patterns/solutions exist in the codebase?]
+**Match:** Similar documentation exists highlighting networking workarounds for Docker on macOS. We can adapt these notes for WSL2 users.
 
-**Plan:** [Step-by-step implementation plan]
-1. [Modify file X to do Y]
-2. [Add function Z]
-3. [Update tests]
+**Plan:**
+1. Identify the key documentation pages that need updating.
+2. Draft a new section explaining the behavior and offering `minikube tunnel` as a solution.
+3. Submit a PR and request review from maintainers aware of WSL2 constraints.
 
-**Implement:** [Link to your branch/commits as you work]
+**Implement:** Create a branch `wsl2-docs-update` and commit the new notes.
 
-**Review:** [Self-review checklist - does it follow the project's contribution guidelines?]
+**Review:** Ensure the documentation is clear, accurate, and adheres to Minikube's styling guidelines.
 
-**Evaluate:** [How will you verify it works?]
+**Evaluate:** Have a Windows user test the newly written documentation steps to verify they correctly resolve the connectivity issue.
 
 ---
 
