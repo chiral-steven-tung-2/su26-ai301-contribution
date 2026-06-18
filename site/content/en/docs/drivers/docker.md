@@ -97,3 +97,7 @@ You can verify your Docker container type by running:
 
    If your docker has [AppArmor](https://wiki.ubuntu.com/AppArmor) enabled, running mysql in privileged mode with docker driver will have the issue [#7401](https://github.com/kubernetes/minikube/issues/7401).
    There is a workaround - see [moby/moby#7512](https://github.com/moby/moby/issues/7512#issuecomment-61787845).
+
+### Accessing Services on WSL2
+
+- On WSL2, services deployed in Minikube are not directly accessible from the Windows host browser due to networking isolation between Windows and the WSL2 virtual machine. See [Docker Driver on WSL2 - Networking Guide]({{<ref "/docs/drivers/docker-wsl2-networking">}}) for detailed solutions including using `minikube tunnel` and `kubectl port-forward`.
