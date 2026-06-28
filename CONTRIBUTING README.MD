@@ -3,7 +3,7 @@
 **Contribution Number:** 1
 **Student:** Steven Tung
 **Issue:** [GitHub issue link](https://github.com/kubernetes/minikube/issues/7879)
-**Status:** Phase 4 In Progress
+**Status:** Phase 4 
 
 ---
 
