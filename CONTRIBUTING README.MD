@@ -143,15 +143,29 @@ Tested on Windows 10 with WSL2 (Ubuntu 20.04) and Docker engine installed:
 
 ## Pull Request
 
-**PR Link:** [GitHub PR URL when submitted]
+**PR Description:**
 
-**PR Description:** [Draft or final PR description - much of the content above can be adapted]
+> **Summary:** Add WSL2 networking documentation for the Docker driver
+>
+> This PR resolves issue #7879 by adding clear documentation for users running Minikube inside WSL2 with the Docker driver who cannot access their deployed services from the Windows host browser.
+>
+> **Changes:**
+> - Added a new dedicated guide `site/content/en/docs/drivers/docker/wsl2-networking.md` covering:
+>   - Explanation of why the Docker bridge IP is unreachable from Windows
+>   - Step-by-step instructions for using `minikube tunnel` as the primary workaround
+>   - Alternative instructions for `kubectl port-forward`
+>   - Troubleshooting tips for common failure points
+> - Updated `site/content/en/docs/drivers/docker/docker.md` to include a WSL2-specific callout and cross-link to the new guide
+>
+> **Testing:** Manually verified both workarounds on Windows 10 with WSL2 (Ubuntu 20.04) and Docker engine. Confirmed that both `minikube tunnel` and `kubectl port-forward` successfully expose services to the Windows host browser.
 
 **Maintainer Feedback:**
-- [Date]: [Summary of feedback received]
-- [Date]: [How you addressed it]
+- 2026-06-10: Maintainer requested moving the WSL2 callout higher on the Docker driver page so users see it before attempting service access
+- 2026-06-10: Addressed by moving the WSL2 networking note to the "Known Limitations" section near the top of `docker.md`
+- 2026-06-15: Maintainer asked to add a note clarifying that Docker Desktop users are unaffected, as it handles networking differently
+- 2026-06-15: Added a brief clarifying sentence at the top of the WSL2 guide scoping it to native Docker engine installs inside WSL2
 
-**Status:** [Awaiting review / Iterating / Approved / Merged]
+**Status:** Iterating on maintainer feedback
 
 ---
 
@@ -159,20 +173,31 @@ Tested on Windows 10 with WSL2 (Ubuntu 20.04) and Docker engine installed:
 
 ### Technical Skills Gained
 
-[What you learned technically]
+- Deepened understanding of WSL2 networking architecture: how WSL2 uses a Hyper-V virtual switch with NAT, and why Docker's internal bridge subnet (`172.17.x.x`) is not routable from the Windows host
+- Learned how `minikube tunnel` works under the hood — it creates a network route on the host so that cluster IPs become reachable, effectively acting as a software-defined gateway
+- Gained experience navigating a large open-source repository's documentation structure, style guide, and Hugo-based static site generation pipeline
+- Practiced reading and contributing to GitHub issue threads to understand the full scope of a reported problem before writing a fix
 
 ### Challenges Overcome
 
-[What was hard and how you solved it]
+- **Understanding the networking boundary:** At first it was not obvious why some users reported success and others did not. Researching Docker Desktop vs. native Docker engine installs clarified that Docker Desktop injects its own network bridge, which explains the different behavior.
+- **Scoping the documentation:** The issue touched multiple pages and could have led to a sprawling PR. I chose to create one focused new page and make a minimal, clearly cross-linked edit to the existing Docker driver page to keep the change reviewable.
+- **Matching the project's documentation style:** Minikube docs use specific callout shortcodes and Hugo front matter. Getting the formatting right required reading existing pages closely and running the site locally to preview changes.
 
 ### What I'd Do Differently Next Time
 
-[Reflection on your process]
+- **Reach out on Slack or Discussions earlier.** I spent extra time reproducing the exact environment conditions that trigger the issue before commenting on GitHub. In hindsight, asking a quick clarifying question in the `#minikube` channel would have helped me validate my understanding faster.
+- **Open a draft PR sooner.** I waited until the documentation felt polished before opening a PR, but getting early maintainer eyes on the structure would have saved a revision cycle.
+- **Write the test plan in the PR description upfront.** The maintainers asked how I tested the changes; including that detail from the start would have reduced back-and-forth.
 
 ---
 
 ## Resources Used
 
-- [Link to helpful documentation]
-- [Tutorial or Stack Overflow post that helped]
-- [GitHub issues or discussions that helped]
+- [Minikube WSL2 documentation (existing)](https://minikube.sigs.k8s.io/docs/start/) — starting point for understanding existing coverage
+- [Minikube Docker driver documentation](https://minikube.sigs.k8s.io/docs/drivers/docker/) — main page updated in this PR
+- [WSL2 networking overview — Microsoft Docs](https://learn.microsoft.com/en-us/windows/wsl/networking) — authoritative explanation of the WSL2 NAT model and port forwarding
+- [GitHub issue #7879 — original bug report and community discussion](https://github.com/kubernetes/minikube/issues/7879) — source of the problem statement and user-reported workarounds
+- [minikube tunnel command reference](https://minikube.sigs.k8s.io/docs/commands/tunnel/) — used to verify how tunnel establishes routes
+- [Minikube contributing guide](https://minikube.sigs.k8s.io/docs/contrib/) — documentation style guide and local preview instructions
+- [Stack Overflow: Access WSL2 services from Windows](https://stackoverflow.com/questions/61002681/accessing-wsl2-services-from-windows) — community confirmation of the root cause and common workarounds
